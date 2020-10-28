@@ -1,0 +1,49 @@
+version: "3"
+
+services:
+  db: 
+    build:
+      context: ./sql
+      dockerfile: Dockerfile
+    ports:
+      - "3306:3306"
+    tty: true
+    environment:
+      MYSQL_ROOT_PASSWORD: "(password123)" #probably should change this
+      MYSQL_DATABASE: "containerdb"
+      MYSQL_USER: "user"
+      MYSQL_PASSWORD: "user1234"
+
+
+  web:
+    
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.override
+    volumes:
+        - ./backend/www:/var/www/html
+    tty: true
+    ports:
+      - "9000:80"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports: 
+      - "8080:80"
+    depends_on:
+      - db
+  
+  httpd:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+        - ./frontend/public:/var/www/html
+        - ./frontend/public/node_modules:/var/www/html/node_modules
+        - ./frontend/public/scripts:/var/www/html/scripts
+        - ./frontend/public/css:/var/www/html/css
+        - ./frontend/public/frontend-script:/var/www/html/frontend-script
+    tty: true
+    ports:
+      - "8000:80"
+    
